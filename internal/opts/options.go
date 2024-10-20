@@ -44,6 +44,7 @@ type Options struct {
 	OmitUnusedStructs           bool              `json:"omit_unused_structs,omitempty" yaml:"omit_unused_structs"`
 	BuildTags                   string            `json:"build_tags,omitempty" yaml:"build_tags"`
 	Initialisms                 *[]string         `json:"initialisms,omitempty" yaml:"initialisms"`
+	KeepCase                    bool              `json:"keep_case,omitempty" yaml:"keep_case"`
 
 	InitialismsMap map[string]struct{} `json:"-" yaml:"-"`
 }

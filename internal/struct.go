@@ -5,8 +5,10 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/sqlc-dev/sqlc-gen-go/internal/opts"
 	"github.com/sqlc-dev/plugin-sdk-go/plugin"
+	"github.com/sqlc-dev/sqlc-gen-go/internal/opts"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 type Struct struct {
@@ -15,6 +17,9 @@ type Struct struct {
 	Fields  []Field
 	Comment string
 }
+
+// Initialize title caser
+var caser = cases.Title(language.English)
 
 func StructName(name string, options *opts.Options) string {
 	if rename := options.Rename[name]; rename != "" {
@@ -31,15 +36,21 @@ func StructName(name string, options *opts.Options) string {
 		return rune('_')
 	}, name)
 
-	for _, p := range strings.Split(name, "_") {
-		if _, found := options.InitialismsMap[p]; found {
-			out += strings.ToUpper(p)
-		} else {
-			out += strings.Title(p)
+	if options.KeepCase {
+		// If KeepCase is set, return the name as is.
+		out = name
+	} else {
+		// Split the name by underscores and capitalize each part.
+		for _, p := range strings.Split(name, "_") {
+			if _, found := options.InitialismsMap[p]; found {
+				out += strings.ToUpper(p)
+			} else {
+				out += caser.String(p)
+			}
 		}
 	}
 
-	// If a name has a digit as its first char, prepand an underscore to make it a valid Go name.
+	// If a name has a digit as its first char, prepend an underscore to make it a valid Go name.
 	r, _ := utf8.DecodeRuneInString(out)
 	if unicode.IsDigit(r) {
 		return "_" + out
